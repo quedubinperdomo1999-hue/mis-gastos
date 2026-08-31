@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#f4f6f9",
   "theme_color": "#14213d",
-  "description": "Control de gastos diarios, semanales y mensuales con gráficos y resumen automático.",
+  "description": "Control de ingresos, gastos, categorías, gráficos y presupuesto mensual.",
   "icons": [
     {
       "src": "icon-192.png",

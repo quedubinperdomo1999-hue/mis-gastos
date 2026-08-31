@@ -1,6 +1,6 @@
-MIS GASTOS v3
+MIS GASTOS v4
 
-Categorías de GASTOS:
+GASTOS:
 - Casa
 - Alimentación
 - Carro
@@ -10,15 +10,15 @@ Categorías de GASTOS:
 - Universidad
 - Préstamo
 
-Categorías de INGRESOS:
+INGRESOS:
 - Negocio
 - Interés sobre préstamo
 - Salario
 
-Incluye:
-- Registro de ingresos y gastos
-- Resumen diario, semanal y mensual
-- Saldo del mes
-- Gráfico de gastos por categoría
-- Gráfico de gastos de los últimos 7 días
-- Respaldo exportable/importable
+NUEVO:
+- Presupuesto mensual guardado por mes
+- Gastado del mes
+- Disponible del mes
+- Porcentaje del presupuesto utilizado
+- Aviso si te acercas o superas el presupuesto
+- Respaldo incluye gastos, ingresos y presupuestos

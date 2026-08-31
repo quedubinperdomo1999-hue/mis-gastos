@@ -55,6 +55,18 @@
     .notice{font-size:12px;color:var(--muted);line-height:1.45}
     .summary-card{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
     .summary-card strong{font-size:20px}.summary-card span{font-size:12px;color:var(--muted)}
+
+    .budget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+    .budget-box{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:12px}
+    .budget-box span{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+    .budget-box strong{font-size:18px}
+    .progress-wrap{margin-top:14px}
+    .progress-head{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .progress-track{height:14px;border-radius:99px;background:#edf0f4;overflow:hidden}
+    .progress-fill{height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .2s ease}
+    .budget-note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.45}
+    @media (max-width:520px){.budget-grid{grid-template-columns:1fr}.budget-box strong{font-size:20px}}
+
     .footer{margin-top:18px;text-align:center;color:var(--muted);font-size:11px}
     @media (max-width:480px){.form-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.metric .value{font-size:21px}}
   </style>
@@ -101,6 +113,44 @@
       </div>
       <button class="primary full" type="submit">+ Guardar movimiento</button>
     </form>
+  </section>
+
+
+  <div class="section-title"><h2>Presupuesto mensual</h2><span id="presupuestoMesLabel">Mes actual</span></div>
+  <section class="card">
+    <div class="form-grid">
+      <div>
+        <label for="presupuestoMensual">Presupuesto del mes</label>
+        <input id="presupuestoMensual" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 15000">
+      </div>
+      <div style="display:flex;align-items:end">
+        <button id="guardarPresupuesto" type="button" class="primary" style="width:100%">Guardar presupuesto</button>
+      </div>
+    </div>
+
+    <div class="budget-grid">
+      <div class="budget-box">
+        <span>Presupuesto</span>
+        <strong id="bPresupuesto">L 0.00</strong>
+      </div>
+      <div class="budget-box">
+        <span>Gastado</span>
+        <strong id="bGastado">L 0.00</strong>
+      </div>
+      <div class="budget-box">
+        <span>Disponible</span>
+        <strong id="bDisponible">L 0.00</strong>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-head">
+        <span>Presupuesto utilizado</span>
+        <strong id="bPorcentaje">0%</strong>
+      </div>
+      <div class="progress-track"><div id="bBarra" class="progress-fill"></div></div>
+    </div>
+    <div id="bMensaje" class="budget-note">Define un presupuesto para este mes y la app te mostrará cuánto te queda disponible.</div>
   </section>
 
   <div class="section-title"><h2>Resumen automático</h2><span>Actualizado al instante</span></div>
@@ -150,7 +200,7 @@
     <p class="notice">Los datos se guardan con almacenamiento local del navegador. Exporta un respaldo de vez en cuando para poder recuperar tus registros si cambias de teléfono o borras los datos del navegador.</p>
   </section>
 
-  <div class="footer">Mis Gastos · Lempiras (HNL)</div>
+  <div class="footer">Mis Gastos · Presupuesto e ingresos · Lempiras (HNL)</div>
 </div>
 
 <script>
@@ -204,6 +254,46 @@
   }
 
 
+
+  function claveMesActual(){
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  function nombreMesActual(){
+    return new Intl.DateTimeFormat('es-HN',{month:'long',year:'numeric'}).format(new Date());
+  }
+
+  function renderPresupuesto(){
+    const clave=claveMesActual();
+    const presupuesto=Number(presupuestos[clave]||0);
+    const mes=resumen(filtrar('mes'));
+    const gastado=mes.gastos;
+    const disponible=presupuesto-gastado;
+    const pct=presupuesto>0?(gastado/presupuesto)*100:0;
+
+    $('#presupuestoMesLabel').textContent=nombreMesActual();
+    $('#presupuestoMensual').value=presupuesto>0?presupuesto:'';
+    $('#bPresupuesto').textContent=fmt(presupuesto);
+    $('#bGastado').textContent=fmt(gastado);
+    $('#bDisponible').textContent=fmt(disponible);
+    $('#bDisponible').style.color=disponible<0?'var(--red)':'var(--green)';
+    $('#bPorcentaje').textContent=`${Math.round(pct)}%`;
+    $('#bBarra').style.width=`${Math.min(Math.max(pct,0),100)}%`;
+    $('#bBarra').style.background=pct>100?'var(--red)':pct>=80?'var(--orange)':'var(--green)';
+
+    const msg=$('#bMensaje');
+    if(presupuesto<=0){
+      msg.textContent='Define un presupuesto para este mes y la app te mostrará cuánto te queda disponible.';
+    }else if(disponible<0){
+      msg.textContent=`Te has pasado del presupuesto por ${fmt(Math.abs(disponible))}.`;
+    }else if(pct>=80){
+      msg.textContent=`Has usado aproximadamente ${Math.round(pct)}% del presupuesto. Te quedan ${fmt(disponible)}.`;
+    }else{
+      msg.textContent=`Vas dentro del presupuesto. Te quedan ${fmt(disponible)} disponibles este mes.`;
+    }
+  }
+
   function renderResumenTexto(){
     const h=resumen(filtrar('hoy')), s=resumen(filtrar('semana')), m=resumen(filtrar('mes'));
     const el=$('#resumenTexto');
@@ -251,6 +341,7 @@
     $('#rSaldo').textContent=fmt(r.saldo);
     $('#rMov').textContent=String(r.mov);
     $('#rCat').textContent=r.top;
+    renderPresupuesto();
     renderResumenTexto();
     renderGraf7();
     $('#resumenPeriodo').textContent=periodo==='hoy'?'Hoy':periodo==='semana'?'Esta semana':'Este mes';
@@ -318,6 +409,19 @@
     document.querySelectorAll('[data-periodo]').forEach(x=>x.classList.toggle('active',x===b));
     render();
   }));
+
+
+  $('#guardarPresupuesto').addEventListener('click',()=>{
+    const valor=Number($('#presupuestoMensual').value);
+    if(!Number.isFinite(valor) || valor<0){
+      alert('Ingresa un presupuesto válido.');
+      return;
+    }
+    const clave=claveMesActual();
+    presupuestos[clave]=valor;
+    guardarPresupuestos();
+    renderPresupuesto();
+  });
 
   $('#exportar').addEventListener('click',()=>{
     const blob=new Blob([JSON.stringify({version:1,exportado:new Date().toISOString(),gastos},null,2)],{type:'application/json'});
