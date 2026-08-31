@@ -53,9 +53,6 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
 .list{display:grid;gap:8px}.item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#09131a;border:1px solid #21313c;border-radius:14px;padding:11px}.meta{font-size:11px;color:var(--muted);margin-top:3px}.amt{font-weight:900;white-space:nowrap}
 .bar-row{margin:10px 0}.bar-head{display:flex;justify-content:space-between;font-size:12px}.track{height:9px;background:#1b2a33;border-radius:99px;overflow:hidden;margin-top:5px}.fill{height:100%;background:var(--green)}
 .empty{color:var(--muted);text-align:center;padding:18px}.note{color:var(--muted);font-size:12px;line-height:1.4;margin-top:10px}
-.settings-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
-.personal-name{color:var(--green);font-weight:800}
-@media(max-width:560px){.settings-row{grid-template-columns:1fr}}
 @media(max-width:560px){.form{grid-template-columns:1fr}.full{grid-column:auto}.budget{grid-template-columns:1fr}.pie-wrap{grid-template-columns:1fr}}
 </style>
 </head>
@@ -63,7 +60,7 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
 <div class="app">
   <section class="hero">
     <img src="icon-192.png" class="logo" alt="Querux">
-    <div><h1>Querux</h1><p id="saludoNombre">Tus finanzas personales</p></div>
+    <div><h1>Querux</h1><p>Controla tus gastos, domina tu dinero.</p></div>
   </section>
 
   <section class="grid">
@@ -72,16 +69,7 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
     <div class="card metric"><small>Saldo del mes</small><strong id="kSaldo">L 0.00</strong></div>
     <div class="card metric"><small>Gastado hoy</small><strong id="kHoy">L 0.00</strong></div>
   </section>
-
-  <div class="section"><h2>Personalizar</h2><span>Querux siempre será el nombre de la app</span></div>
-  <section class="card">
-    <div class="settings-row">
-      <div><label for="nombreUsuario">Tu nombre</label><input id="nombreUsuario" maxlength="40" placeholder="Ej. Fernando"></div>
-      <button id="guardarNombre" type="button" class="primary">Guardar nombre</button>
-    </div>
-    <div id="vistaNombre" class="note">Agrega tu nombre para personalizar Querux.</div>
-  </section>
-  <div class="section"><h2>Nuevo movimiento</h2><span>Guardado en tu dispositivo</span></div>
+<div class="section"><h2>Nuevo movimiento</h2><span>Guardado en tu dispositivo</span></div>
   <section class="card">
     <form id="form" class="form">
       <div><label>Tipo</label><select id="tipo"><option value="gasto">Gasto</option><option value="ingreso">Ingreso</option></select></div>
@@ -132,7 +120,6 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
 (()=>{
 const KEY='mis_gastos_hn_v1';
 const BKEY='mis_gastos_presupuestos_v1';
-const PKEY='querux_perfil_v1';
 
 const CATEGORIAS_GASTO=[
   'Casa','Alimentación','Carro','Entretenimiento',
@@ -140,7 +127,7 @@ const CATEGORIAS_GASTO=[
 ];
 const CATEGORIAS_INGRESO=['Negocio','Interés sobre préstamo','Salario'];
 
-let movimientos=[],presupuestos={},periodo='mes',perfil={nombre:''};
+let movimientos=[],presupuestos={},periodo='mes';
 const $=s=>document.querySelector(s);
 const fmt=n=>'L '+Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -167,10 +154,6 @@ function cargar(){
     presupuestos=JSON.parse(localStorage.getItem(BKEY)||'{}');
     if(!presupuestos || typeof presupuestos!=='object' || Array.isArray(presupuestos)) presupuestos={};
   }catch(e){presupuestos={}}
-  try{
-    perfil=JSON.parse(localStorage.getItem(PKEY)||'{"nombre":""}');
-    if(!perfil || typeof perfil!=='object') perfil={nombre:''};
-  }catch(e){perfil={nombre:''}}
 }
 function guardarMov(){localStorage.setItem(KEY,JSON.stringify(movimientos))}
 function guardarPres(){localStorage.setItem(BKEY,JSON.stringify(presupuestos))}
@@ -196,21 +179,12 @@ function filtrar(p){return movimientos.filter(m=>estaEnPeriodo(m,p))}
 function sumar(arr,tipo){return arr.filter(m=>m.tipo===tipo).reduce((a,m)=>a+Number(m.monto||0),0)}
 
 
-function guardarPerfil(){localStorage.setItem(PKEY,JSON.stringify(perfil))}
-function renderPerfil(){
-  const nombre=(perfil.nombre||'').trim();
-  $('#nombreUsuario').value=nombre;
-  $('#saludoNombre').innerHTML=nombre ? `Finanzas de <span class="personal-name">${nombre}</span>` : 'Tus finanzas personales';
-  $('#vistaNombre').innerHTML=nombre ? `<span class="personal-name">${nombre}</span>, este es tu espacio personal dentro de Querux.` : 'Agrega tu nombre para personalizar Querux.';
-}
-
 function cargarCategorias(){
   const arr=$('#tipo').value==='ingreso'?CATEGORIAS_INGRESO:CATEGORIAS_GASTO;
   $('#categoria').innerHTML=arr.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
 function render(){
-  renderPerfil();
   const mes=filtrar('mes');
   const hoy=filtrar('hoy');
   const ingresos=sumar(mes,'ingreso');
@@ -246,7 +220,7 @@ function renderPresupuesto(gastado){
   $('#pNota').textContent=
     p<=0 ? 'Define tu presupuesto mensual.' :
     disp<0 ? `Te pasaste por ${fmt(Math.abs(disp))}.` :
-    `${perfil.nombre ? perfil.nombre+', ' : ''}has usado ${Math.round(pct)}% del presupuesto. Te quedan ${fmt(disp)}.`;
+    `Has usado ${Math.round(pct)}% del presupuesto. Te quedan ${fmt(disp)}.`;
 }
 
 function renderPastel(){
@@ -348,12 +322,6 @@ $('#form').addEventListener('submit',e=>{
   render();
 });
 
-
-$('#guardarNombre').addEventListener('click',()=>{
-  perfil.nombre=$('#nombreUsuario').value.trim();
-  guardarPerfil();
-  renderPerfil();
-});
 
 $('#guardarPresupuesto').addEventListener('click',()=>{
   const v=Number($('#presupuesto').value);
