@@ -1,13 +1,14 @@
-QUERUX v12 - CORRECCIÓN DEL GASTO
+QUERUX v13 - MONTO DINÁMICO EN LAS ANIMACIONES
 
-Corregido:
-- La animación de gasto ya no usa el recorte incorrecto con controles de pantalla.
-- Ahora muestra la mascota triste/tierna roja seleccionada.
-- La animación de ingreso verde se mantiene sin cambios.
-- Se mantienen partículas, destellos, presupuesto, categorías y gráficos.
+CAMBIO PRINCIPAL:
+- Las imágenes de ingreso y gasto ya no muestran un monto fijo.
+- Querux coloca automáticamente el monto REAL registrado debajo de la mascota.
+- Ejemplo gasto: - L 325.50
+- Ejemplo ingreso: + L 8,000.00
+- También muestra “¡Gasto registrado!” o “¡Ingreso registrado!”.
+- Se mantienen las partículas de dinero, destellos y demás funciones.
 
-Para actualizar puedes subir todos los archivos del ZIP.
-Si quieres la actualización mínima, reemplaza:
-1. mascota-gasto.jpg
-2. service-worker.js
-y haz Commit changes.
+ACTUALIZACIÓN:
+Sube todos los archivos de este ZIP a la raíz de GitHub y reemplaza los anteriores.
+Haz Commit changes y espera 1 a 3 minutos.
+No borres datos de Safari.

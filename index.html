@@ -180,12 +180,75 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
   .mascot-confirm,.mascot-confirm img{transition:none!important;animation:none!important}
 }
 
+
+.mascot-panel{
+  overflow:hidden;
+  border-radius:20px;
+  background:#071017;
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 22px 65px rgba(0,0,0,.58);
+  text-align:center;
+  padding-bottom:18px;
+}
+.mascot-confirm.ingreso .mascot-panel{
+  border-color:rgba(98,214,41,.70);
+  box-shadow:0 22px 65px rgba(0,0,0,.58),0 0 28px rgba(98,214,41,.20);
+}
+.mascot-confirm.gasto .mascot-panel{
+  border-color:rgba(255,69,58,.78);
+  box-shadow:0 22px 65px rgba(0,0,0,.58),0 0 28px rgba(255,69,58,.18);
+}
+.mascot-confirm .mascot-panel img{
+  width:100%;
+  height:auto;
+  max-height:none;
+  object-fit:cover;
+  object-position:top;
+  border-radius:0;
+  box-shadow:none;
+}
+.mascot-amount{
+  margin-top:12px;
+  font-size:29px;
+  line-height:1.1;
+  font-weight:950;
+  letter-spacing:-.5px;
+}
+.mascot-confirm.ingreso .mascot-amount{color:#62d629}
+.mascot-confirm.gasto .mascot-amount{color:#ff5248}
+.mascot-label{
+  margin-top:7px;
+  color:#f3f7fa;
+  font-size:17px;
+  font-weight:800;
+}
+.mascot-check{
+  width:42px;height:42px;
+  margin:14px auto 0;
+  border-radius:50%;
+  display:grid;place-items:center;
+  font-size:24px;font-weight:950;
+}
+.mascot-confirm.ingreso .mascot-check{
+  color:#8af157;border:3px solid #62d629;
+  box-shadow:0 0 17px rgba(98,214,41,.38);
+}
+.mascot-confirm.gasto .mascot-check{
+  color:#ff756d;border:3px solid #ff453a;
+  box-shadow:0 0 17px rgba(255,69,58,.32);
+}
+
 </style>
 </head>
 <body>
 <div id="mascotBackdrop" class="mascot-backdrop" aria-hidden="true"></div>
 <div id="mascotConfirm" class="mascot-confirm" role="status" aria-live="polite">
-  <img id="mascotImage" src="mascota-ingreso.jpg" alt="Confirmación de movimiento">
+  <div class="mascot-panel">
+    <img id="mascotImage" src="mascota-ingreso.jpg" alt="Confirmación de movimiento">
+    <div id="mascotAmount" class="mascot-amount"></div>
+    <div id="mascotLabel" class="mascot-label"></div>
+    <div class="mascot-check">✓</div>
+  </div>
 </div>
 <div id="moneyStage" class="money-stage" aria-hidden="true"></div>
 <div id="moneyToast" class="money-toast" role="status" aria-live="polite">
@@ -319,10 +382,14 @@ function animarMovimiento(tipo,monto){
   const mascot=$('#mascotConfirm');
   const mascotImg=$('#mascotImage');
   const mascotBackdrop=$('#mascotBackdrop');
+  const mascotAmount=$('#mascotAmount');
+  const mascotLabel=$('#mascotLabel');
   const esIngresoMascota=tipo==='ingreso';
   mascot.classList.remove('show','ingreso','gasto');
   mascotImg.src=esIngresoMascota?'mascota-ingreso.jpg':'mascota-gasto.jpg';
   mascotImg.alt=esIngresoMascota?'Ingreso registrado en Querux':'Gasto registrado en Querux';
+  mascotAmount.textContent=(esIngresoMascota?'+ ':'- ')+fmt(monto);
+  mascotLabel.textContent=esIngresoMascota?'¡Ingreso registrado!':'¡Gasto registrado!';
   mascot.classList.add(esIngresoMascota?'ingreso':'gasto');
   mascotBackdrop.classList.add('show');
   void mascot.offsetWidth;
