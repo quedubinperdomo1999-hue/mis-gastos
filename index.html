@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#14213d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Mis Gastos" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Mis Gastos</title>
+  <style>
+    :root{
+      --bg:#f4f6f9; --card:#ffffff; --text:#182230; --muted:#667085;
+      --line:#e4e7ec; --primary:#14213d; --accent:#fca311; --green:#1f9d55;
+      --red:#c73e1d; --blue:#457b9d; --purple:#6c5ce7;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+    }
+    .app{max-width:720px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 14px calc(30px + env(safe-area-inset-bottom))}
+    .hero{background:linear-gradient(135deg,#14213d,#243b67);color:white;border-radius:24px;padding:20px;margin-bottom:14px}
+    .hero h1{margin:0 0 6px;font-size:26px}.hero p{margin:0;color:#d8deea;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:15px}
+    .metric .label{font-size:12px;color:var(--muted);margin-bottom:6px}.metric .value{font-size:24px;font-weight:800}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 2px 10px}
+    .section-title h2{font-size:18px;margin:0}.section-title span{font-size:12px;color:var(--muted)}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+    input,select{
+      width:100%;min-height:48px;border:1px solid var(--line);border-radius:14px;padding:0 12px;
+      font-size:16px;background:#fff;color:var(--text);outline:none
+    }
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(252,163,17,.15)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .full{grid-column:1/-1}
+    button{
+      min-height:48px;border:0;border-radius:14px;padding:0 15px;font-size:15px;font-weight:800;cursor:pointer
+    }
+    .primary{background:var(--primary);color:white}.secondary{background:#eef2f6;color:var(--text)}
+    .danger{background:#fff0ed;color:var(--red)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{flex:1}
+    .list{display:grid;gap:8px}.item{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:16px;padding:12px}
+    .item-main{min-width:0}.item-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .item-meta{font-size:12px;color:var(--muted);margin-top:3px}.amount{font-weight:900;white-space:nowrap}
+    .empty{text-align:center;color:var(--muted);padding:24px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#e9edf2;padding:5px;border-radius:14px}
+    .tabs button{min-height:42px;background:transparent;color:var(--muted)}
+    .tabs button.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(16,24,40,.08)}
+    .bar-row{margin:12px 0}.bar-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}.track{height:10px;background:#edf0f4;border-radius:99px;overflow:hidden}
+    .fill{height:100%;border-radius:99px;background:var(--blue)}
+    .notice{font-size:12px;color:var(--muted);line-height:1.45}
+    .summary-card{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
+    .summary-card strong{font-size:20px}.summary-card span{font-size:12px;color:var(--muted)}
+    .footer{margin-top:18px;text-align:center;color:var(--muted);font-size:11px}
+    @media (max-width:480px){.form-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.metric .value{font-size:21px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <h1>Mis Gastos</h1>
+    <p>Registra tus gastos y revisa cuánto llevas hoy, esta semana y este mes.</p>
+  </section>
+
+  <section class="grid">
+    <div class="card metric"><div class="label">Hoy</div><div id="mHoy" class="value">L 0.00</div></div>
+    <div class="card metric"><div class="label">Este mes</div><div id="mMes" class="value">L 0.00</div></div>
+    <div class="card metric"><div class="label">Esta semana</div><div id="mSemana" class="value">L 0.00</div></div>
+    <div class="card metric"><div class="label">Mayor gasto del mes</div><div id="mMayor" class="value">L 0.00</div></div>
+  </section>
+
+  <div class="section-title"><h2>Agregar gasto</h2><span>Guardado en este dispositivo</span></div>
+  <section class="card">
+    <form id="form" class="form-grid">
+      <div>
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" required>
+      </div>
+      <div>
+        <label for="monto">Monto</label>
+        <input id="monto" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required>
+      </div>
+      <div>
+        <label for="categoria">Categoría</label>
+        <select id="categoria">
+          <option>Comida</option><option>Transporte</option><option>Casa</option><option>Servicios</option>
+          <option>Compras</option><option>Entretenimiento</option><option>Salud</option><option>Educación</option><option>Otros</option>
+        </select>
+      </div>
+      <div>
+        <label for="detalle">Detalle</label>
+        <input id="detalle" maxlength="80" placeholder="Ej. Almuerzo">
+      </div>
+      <button class="primary full" type="submit">+ Guardar gasto</button>
+    </form>
+  </section>
+
+  <div class="section-title"><h2>Resumen</h2><span id="resumenPeriodo">Hoy</span></div>
+  <section class="card">
+    <div class="tabs">
+      <button type="button" data-periodo="hoy" class="active">Hoy</button>
+      <button type="button" data-periodo="semana">Semana</button>
+      <button type="button" data-periodo="mes">Mes</button>
+    </div>
+    <div style="height:14px"></div>
+    <div class="summary-card">
+      <span>Total gastado</span><strong id="rTotal">L 0.00</strong>
+      <span>Movimientos</span><strong id="rMov">0</strong>
+      <span>Categoría principal</span><strong id="rCat">—</strong>
+    </div>
+    <div id="barras" style="margin-top:16px"></div>
+  </section>
+
+  <div class="section-title"><h2>Movimientos recientes</h2><span id="contador">0 gastos</span></div>
+  <section class="card">
+    <div id="lista" class="list"></div>
+    <div id="vacio" class="empty">Todavía no has registrado gastos.</div>
+  </section>
+
+  <div class="section-title"><h2>Respaldo</h2><span>Recomendado</span></div>
+  <section class="card">
+    <div class="toolbar">
+      <button id="exportar" type="button" class="secondary">Exportar respaldo</button>
+      <button id="importarBtn" type="button" class="secondary">Importar respaldo</button>
+      <button id="borrarTodo" type="button" class="danger">Borrar todo</button>
+    </div>
+    <input id="importar" type="file" accept="application/json" hidden>
+    <p class="notice">Los datos se guardan con almacenamiento local del navegador. Exporta un respaldo de vez en cuando para poder recuperar tus registros si cambias de teléfono o borras los datos del navegador.</p>
+  </section>
+
+  <div class="footer">Mis Gastos · Lempiras (HNL)</div>
+</div>
+
+<script>
+(() => {
+  const KEY = 'mis_gastos_hn_v1';
+  let gastos = [];
+  let periodo = 'hoy';
+
+  const $ = s => document.querySelector(s);
+  const fmt = n => 'L ' + Number(n || 0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const hoyISO = () => {
+    const d = new Date();
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  };
+  const parseDate = iso => {
+    const [y,m,d]=iso.split('-').map(Number);
+    return new Date(y,m-1,d);
+  };
+  const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+  const inicioSemana = d => {
+    const x = new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); return x;
+  };
+
+  function cargar(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      gastos = raw ? JSON.parse(raw) : [];
+      if(!Array.isArray(gastos)) gastos=[];
+    }catch(e){ gastos=[]; }
+  }
+  function guardar(){ localStorage.setItem(KEY, JSON.stringify(gastos)); }
+
+  function filtrar(tipo){
+    const now = new Date();
+    return gastos.filter(g=>{
+      const d=parseDate(g.fecha);
+      if(tipo==='hoy') return sameDay(d,now);
+      if(tipo==='mes') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+      const ini=inicioSemana(now), fin=new Date(ini); fin.setDate(fin.getDate()+7);
+      return d>=ini && d<fin;
+    });
+  }
+
+  function resumen(arr){
+    const total=arr.reduce((a,g)=>a+Number(g.monto),0);
+    const cats={}; arr.forEach(g=>cats[g.categoria]=(cats[g.categoria]||0)+Number(g.monto));
+    const orden=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+    return {total,cats,orden,top:orden[0]?.[0]||'—'};
+  }
+
+  function render(){
+    const hoy=filtrar('hoy'), sem=filtrar('semana'), mes=filtrar('mes');
+    $('#mHoy').textContent=fmt(resumen(hoy).total);
+    $('#mSemana').textContent=fmt(resumen(sem).total);
+    $('#mMes').textContent=fmt(resumen(mes).total);
+    $('#mMayor').textContent=fmt(mes.reduce((m,g)=>Math.max(m,Number(g.monto)),0));
+
+    const arr=filtrar(periodo), r=resumen(arr);
+    $('#rTotal').textContent=fmt(r.total);
+    $('#rMov').textContent=String(arr.length);
+    $('#rCat').textContent=r.top;
+    $('#resumenPeriodo').textContent=periodo==='hoy'?'Hoy':periodo==='semana'?'Esta semana':'Este mes';
+
+    $('#barras').innerHTML='';
+    if(!r.orden.length){
+      $('#barras').innerHTML='<div class="empty">Sin datos para este período.</div>';
+    } else {
+      r.orden.forEach(([cat,val],i)=>{
+        const pct=r.total?Math.max(4,(val/r.total)*100):0;
+        const el=document.createElement('div');
+        el.className='bar-row';
+        el.innerHTML=`<div class="bar-head"><span>${cat}</span><strong>${fmt(val)}</strong></div><div class="track"><div class="fill" style="width:${pct}%"></div></div>`;
+        $('#barras').appendChild(el);
+      });
+    }
+
+    const recientes=[...gastos].sort((a,b)=>b.createdAt-a.createdAt).slice(0,20);
+    $('#lista').innerHTML='';
+    $('#vacio').style.display=recientes.length?'none':'block';
+    $('#contador').textContent=`${gastos.length} ${gastos.length===1?'gasto':'gastos'}`;
+    recientes.forEach(g=>{
+      const el=document.createElement('div'); el.className='item';
+      const left=document.createElement('div'); left.className='item-main';
+      const t=document.createElement('div'); t.className='item-title'; t.textContent=g.detalle||g.categoria;
+      const m=document.createElement('div'); m.className='item-meta'; m.textContent=`${g.categoria} · ${g.fecha.split('-').reverse().join('/')}`;
+      left.append(t,m);
+      const amount=document.createElement('div'); amount.className='amount'; amount.textContent=fmt(g.monto);
+      el.append(left,amount);
+      $('#lista').appendChild(el);
+    });
+  }
+
+  $('#fecha').value=hoyISO();
+
+  $('#form').addEventListener('submit',e=>{
+    e.preventDefault();
+    const monto=Number($('#monto').value);
+    if(!Number.isFinite(monto)||monto<=0) return;
+    gastos.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+      fecha:$('#fecha').value,
+      monto,
+      categoria:$('#categoria').value,
+      detalle:$('#detalle').value.trim(),
+      createdAt:Date.now()
+    });
+    guardar(); $('#monto').value=''; $('#detalle').value=''; render(); $('#monto').focus();
+  });
+
+  document.querySelectorAll('[data-periodo]').forEach(b=>b.addEventListener('click',()=>{
+    periodo=b.dataset.periodo;
+    document.querySelectorAll('[data-periodo]').forEach(x=>x.classList.toggle('active',x===b));
+    render();
+  }));
+
+  $('#exportar').addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify({version:1,exportado:new Date().toISOString(),gastos},null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='respaldo-mis-gastos.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  });
+  $('#importarBtn').addEventListener('click',()=>$('#importar').click());
+  $('#importar').addEventListener('change',async e=>{
+    const file=e.target.files?.[0]; if(!file) return;
+    try{
+      const data=JSON.parse(await file.text());
+      if(!Array.isArray(data.gastos)) throw new Error();
+      gastos=data.gastos; guardar(); render(); alert('Respaldo importado correctamente.');
+    }catch(err){ alert('El archivo de respaldo no es válido.'); }
+    e.target.value='';
+  });
+  $('#borrarTodo').addEventListener('click',()=>{
+    if(confirm('¿Seguro que deseas borrar todos los gastos guardados?')){
+      gastos=[]; guardar(); render();
+    }
+  });
+
+  cargar(); render();
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+  }
+})();
+</script>
+</body>
+</html>
