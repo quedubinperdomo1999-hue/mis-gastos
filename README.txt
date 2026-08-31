@@ -1,21 +1,24 @@
-MIS GASTOS - WEB APP PARA IPHONE
+MIS GASTOS v3
+
+Categorías de GASTOS:
+- Casa
+- Alimentación
+- Carro
+- Entretenimiento
+- Gasto pendejo
+- Salidas
+- Universidad
+- Préstamo
+
+Categorías de INGRESOS:
+- Negocio
+- Interés sobre préstamo
+- Salario
 
 Incluye:
-- Registro de gastos diarios.
-- Resumen de hoy, semana y mes.
-- Total mensual y mayor gasto.
-- Resumen por categoría.
-- Datos guardados en el navegador con localStorage.
-- Exportación/importación de respaldo.
-- Funciona sin internet después de instalarse como PWA.
-
-PARA USARLA COMO APP EN IPHONE:
-1. Publica esta carpeta en un hosting HTTPS (GitHub Pages, Netlify, Vercel, etc.).
-2. Abre la dirección en Safari.
-3. Pulsa Compartir.
-4. Elige "Agregar a pantalla de inicio".
-5. Ábrela desde el icono "Mis Gastos".
-
-IMPORTANTE:
-Los gastos quedan guardados en ese navegador/dispositivo.
-Usa "Exportar respaldo" periódicamente para tener una copia.
+- Registro de ingresos y gastos
+- Resumen diario, semanal y mensual
+- Saldo del mes
+- Gráfico de gastos por categoría
+- Gráfico de gastos de los últimos 7 días
+- Respaldo exportable/importable

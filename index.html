@@ -85,21 +85,30 @@
         <input id="monto" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required>
       </div>
       <div>
-        <label for="categoria">Categoría</label>
-        <select id="categoria">
-          <option>Comida</option><option>Transporte</option><option>Casa</option><option>Servicios</option>
-          <option>Compras</option><option>Entretenimiento</option><option>Salud</option><option>Educación</option><option>Otros</option>
+        <label for="tipo">Tipo</label>
+        <select id="tipo">
+          <option value="gasto">Gasto</option>
+          <option value="ingreso">Ingreso</option>
         </select>
+      </div>
+      <div>
+        <label for="categoria">Categoría</label>
+        <select id="categoria"></select>
       </div>
       <div>
         <label for="detalle">Detalle</label>
         <input id="detalle" maxlength="80" placeholder="Ej. Almuerzo">
       </div>
-      <button class="primary full" type="submit">+ Guardar gasto</button>
+      <button class="primary full" type="submit">+ Guardar movimiento</button>
     </form>
   </section>
 
-  <div class="section-title"><h2>Resumen</h2><span id="resumenPeriodo">Hoy</span></div>
+  <div class="section-title"><h2>Resumen automático</h2><span>Actualizado al instante</span></div>
+  <section class="card">
+    <p id="resumenTexto" style="margin:0;line-height:1.55;font-size:14px">Aún no hay gastos registrados.</p>
+  </section>
+
+  <div class="section-title"><h2>Resumen por período</h2><span id="resumenPeriodo">Hoy</span></div>
   <section class="card">
     <div class="tabs">
       <button type="button" data-periodo="hoy" class="active">Hoy</button>
@@ -108,11 +117,20 @@
     </div>
     <div style="height:14px"></div>
     <div class="summary-card">
-      <span>Total gastado</span><strong id="rTotal">L 0.00</strong>
+      <span>Ingresos</span><strong id="rIngresos">L 0.00</strong>
+      <span>Gastos</span><strong id="rGastos">L 0.00</strong>
+      <span>Saldo</span><strong id="rSaldo">L 0.00</strong>
       <span>Movimientos</span><strong id="rMov">0</strong>
-      <span>Categoría principal</span><strong id="rCat">—</strong>
+      <span>Mayor categoría de gasto</span><strong id="rCat">—</strong>
     </div>
     <div id="barras" style="margin-top:16px"></div>
+  </section>
+
+  <div class="section-title"><h2>Gráfico últimos 7 días</h2><span>Tendencia diaria</span></div>
+  <section class="card">
+    <div style="overflow-x:auto">
+      <div id="graf7" style="display:grid;grid-template-columns:repeat(7,minmax(42px,1fr));gap:8px;align-items:end;min-width:360px;height:200px;padding-top:12px"></div>
+    </div>
   </section>
 
   <div class="section-title"><h2>Movimientos recientes</h2><span id="contador">0 gastos</span></div>
@@ -182,7 +200,42 @@
     const total=arr.reduce((a,g)=>a+Number(g.monto),0);
     const cats={}; arr.forEach(g=>cats[g.categoria]=(cats[g.categoria]||0)+Number(g.monto));
     const orden=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
-    return {total,cats,orden,top:orden[0]?.[0]||'—'};
+    return {total,cats,orden,top:orden[0]?.[0]||'—',prom:arr.length?total/arr.length:0};
+  }
+
+
+  function renderResumenTexto(){
+    const h=resumen(filtrar('hoy')), s=resumen(filtrar('semana')), m=resumen(filtrar('mes'));
+    const el=$('#resumenTexto');
+    if(!gastos.length){
+      el.textContent='Aún no hay movimientos registrados. Agrega tu primer ingreso o gasto para comenzar.';
+      return;
+    }
+    let texto=`Este mes has recibido ${fmt(m.ingresos)} y gastado ${fmt(m.gastos)}, dejando un saldo de ${fmt(m.saldo)}.`;
+    texto+=` Esta semana llevas ${fmt(s.gastos)} en gastos y hoy ${fmt(h.gastos)}.`;
+    if(m.top!=='—') texto+=` Tu categoría de gasto más alta este mes es ${m.top}.`;
+    el.textContent=texto;
+  }
+
+  function renderGraf7(){
+    const wrap=$('#graf7'); wrap.innerHTML='';
+    const now=new Date(), days=[];
+    for(let i=6;i>=0;i--){
+      const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);
+      const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const total=gastos.filter(g=>g.fecha===iso && g.tipo!=='ingreso').reduce((a,g)=>a+Number(g.monto),0);
+      days.push({d,total});
+    }
+    const max=Math.max(...days.map(x=>x.total),1);
+    const nombres=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    days.forEach(x=>{
+      const col=document.createElement('div');
+      col.style.cssText='height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px';
+      const amt=document.createElement('div'); amt.style.cssText='font-size:10px;color:var(--muted);text-align:center'; amt.textContent=fmt(x.total).replace('.00','');
+      const bar=document.createElement('div'); bar.style.cssText=`width:72%;height:${Math.max(3,(x.total/max)*125)}px;background:var(--accent);border-radius:8px 8px 2px 2px`;
+      const lab=document.createElement('div'); lab.style.cssText='font-size:11px;font-weight:700;color:var(--muted)'; lab.textContent=nombres[x.d.getDay()];
+      col.append(amt,bar,lab); wrap.appendChild(col);
+    });
   }
 
   function render(){
@@ -193,9 +246,13 @@
     $('#mMayor').textContent=fmt(mes.reduce((m,g)=>Math.max(m,Number(g.monto)),0));
 
     const arr=filtrar(periodo), r=resumen(arr);
-    $('#rTotal').textContent=fmt(r.total);
-    $('#rMov').textContent=String(arr.length);
+    $('#rIngresos').textContent=fmt(r.ingresos);
+    $('#rGastos').textContent=fmt(r.gastos);
+    $('#rSaldo').textContent=fmt(r.saldo);
+    $('#rMov').textContent=String(r.mov);
     $('#rCat').textContent=r.top;
+    renderResumenTexto();
+    renderGraf7();
     $('#resumenPeriodo').textContent=periodo==='hoy'?'Hoy':periodo==='semana'?'Esta semana':'Este mes';
 
     $('#barras').innerHTML='';
@@ -219,13 +276,25 @@
       const el=document.createElement('div'); el.className='item';
       const left=document.createElement('div'); left.className='item-main';
       const t=document.createElement('div'); t.className='item-title'; t.textContent=g.detalle||g.categoria;
-      const m=document.createElement('div'); m.className='item-meta'; m.textContent=`${g.categoria} · ${g.fecha.split('-').reverse().join('/')}`;
+      const m=document.createElement('div'); m.className='item-meta'; m.textContent=`${g.tipo==='ingreso'?'Ingreso':'Gasto'} · ${g.categoria} · ${g.fecha.split('-').reverse().join('/')}`;
       left.append(t,m);
-      const amount=document.createElement('div'); amount.className='amount'; amount.textContent=fmt(g.monto);
+      const amount=document.createElement('div'); amount.className='amount'; amount.textContent=(g.tipo==='ingreso'?'+ ':'- ')+fmt(g.monto); amount.style.color=g.tipo==='ingreso'?'var(--green)':'var(--red)';
       el.append(left,amount);
       $('#lista').appendChild(el);
     });
   }
+
+  function actualizarCategorias(){
+    const tipo=$('#tipo').value;
+    const lista=tipo==='ingreso'?CATEGORIAS_INGRESO:CATEGORIAS_GASTO;
+    $('#categoria').innerHTML='';
+    lista.forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c; o.textContent=c; $('#categoria').appendChild(o);
+    });
+  }
+  $('#tipo').addEventListener('change',actualizarCategorias);
+  actualizarCategorias();
 
   $('#fecha').value=hoyISO();
 
