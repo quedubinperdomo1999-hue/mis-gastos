@@ -335,6 +335,27 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
   </section>
 
 
+
+  <div class="section"><h2>Registrar ahorro</h2><span>Agrega dinero a tu meta</span></div>
+  <section class="card">
+    <form id="formAhorro" class="form">
+      <div>
+        <label for="ahorroMonto">Monto ahorrado</label>
+        <input id="ahorroMonto" type="number" step="0.01" min="0.01" placeholder="Ej. 1000" required>
+      </div>
+      <div>
+        <label for="ahorroFecha">Fecha</label>
+        <input id="ahorroFecha" type="date" required>
+      </div>
+      <div class="full">
+        <label for="ahorroDetalle">Detalle</label>
+        <input id="ahorroDetalle" maxlength="80" placeholder="Ej. Ahorro de quincena">
+      </div>
+      <button class="primary full" type="submit">+ Registrar ahorro</button>
+    </form>
+    <div class="note" style="margin-top:10px">Este monto se sumará automáticamente a tu Meta de ahorro.</div>
+  </section>
+
   <div class="section"><h2>Meta de ahorro</h2><span>Tu progreso personal</span></div>
   <section class="card">
     <div class="saving-goal-grid">
@@ -729,6 +750,41 @@ $('#form').addEventListener('submit',e=>{
 
 
 
+
+$('#formAhorro').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const monto=parseFloat($('#ahorroMonto').value);
+  if(!Number.isFinite(monto) || monto<=0) return;
+
+  movimientos.push({
+    id:Date.now(),
+    tipo:'gasto',
+    categoria:'Ahorro',
+    fecha:$('#ahorroFecha').value||hoyISO(),
+    monto,
+    detalle:$('#ahorroDetalle').value.trim()||'Ahorro'
+  });
+
+  guardarMov();
+  $('#ahorroMonto').value='';
+  $('#ahorroDetalle').value='';
+  $('#ahorroFecha').value=hoyISO();
+  render();
+  animarMovimiento('ingreso',monto);
+
+  const toast=$('#moneyToast');
+  const big=$('#moneyToastBig');
+  const small=$('#moneyToastSmall');
+  if(toast && big && small){
+    toast.classList.remove('gasto');
+    toast.classList.add('ingreso');
+    big.textContent='+ '+fmt(monto);
+    small.textContent='Ahorro registrado correctamente';
+  }
+  const mascotLabel=$('#mascotLabel');
+  if(mascotLabel) mascotLabel.textContent='¡Ahorro registrado!';
+});
+
 $('#guardarMetaAhorro').addEventListener('click',()=>{
   const v=parseFloat($('#metaAhorro').value);
   metaAhorro=Number.isFinite(v) && v>=0 ? v : 0;
@@ -754,6 +810,7 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
 });
 
 $('#fecha').value=hoyISO();
+  if($('#ahorroFecha')) $('#ahorroFecha').value=hoyISO();
 $('#mesLabel').textContent=new Intl.DateTimeFormat('es-HN',{month:'long',year:'numeric'}).format(new Date());
 
 cargar();
