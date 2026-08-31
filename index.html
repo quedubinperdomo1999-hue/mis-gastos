@@ -54,9 +54,144 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
 .bar-row{margin:10px 0}.bar-head{display:flex;justify-content:space-between;font-size:12px}.track{height:9px;background:#1b2a33;border-radius:99px;overflow:hidden;margin-top:5px}.fill{height:100%;background:var(--green)}
 .empty{color:var(--muted);text-align:center;padding:18px}.note{color:var(--muted);font-size:12px;line-height:1.4;margin-top:10px}
 @media(max-width:560px){.form{grid-template-columns:1fr}.full{grid-column:auto}.budget{grid-template-columns:1fr}.pie-wrap{grid-template-columns:1fr}}
+
+/* Animaciones de confirmación */
+.money-toast{
+  position:fixed;
+  left:50%;
+  top:18%;
+  transform:translate(-50%,-12px) scale(.92);
+  z-index:9999;
+  min-width:230px;
+  max-width:86vw;
+  padding:14px 18px;
+  border-radius:18px;
+  text-align:center;
+  font-weight:900;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 16px 42px rgba(0,0,0,.38);
+}
+.money-toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.money-toast.ingreso{
+  color:#eaffdf;
+  background:rgba(39,117,25,.93);
+  border:1px solid rgba(116,234,49,.7);
+}
+.money-toast.gasto{
+  color:#fff0ee;
+  background:rgba(143,35,31,.94);
+  border:1px solid rgba(255,69,58,.75);
+}
+.money-toast .big{display:block;font-size:22px;margin-bottom:3px}
+.money-toast .small{display:block;font-size:12px;font-weight:700;opacity:.85}
+
+.money-stage{
+  position:fixed;
+  inset:0;
+  z-index:9998;
+  pointer-events:none;
+  overflow:hidden;
+}
+.money-particle{
+  position:absolute;
+  left:50%;
+  top:42%;
+  font-size:25px;
+  opacity:0;
+  will-change:transform,opacity;
+}
+.money-particle.income{animation:moneyIn .95s ease-out forwards}
+.money-particle.expense{animation:moneyOut .9s ease-out forwards}
+@keyframes moneyIn{
+  0%{opacity:0;transform:translate(var(--x1),80px) scale(.55) rotate(var(--r1))}
+  20%{opacity:1}
+  75%{opacity:1}
+  100%{opacity:0;transform:translate(var(--x2),-95px) scale(1.2) rotate(var(--r2))}
+}
+@keyframes moneyOut{
+  0%{opacity:0;transform:translate(var(--x1),-25px) scale(.9) rotate(var(--r1))}
+  15%{opacity:1}
+  70%{opacity:1}
+  100%{opacity:0;transform:translate(var(--x2),115px) scale(.55) rotate(var(--r2))}
+}
+.flash-card-income{animation:flashIncome .65s ease}
+.flash-card-expense{animation:flashExpense .65s ease}
+@keyframes flashIncome{
+  0%,100%{box-shadow:0 16px 34px rgba(0,0,0,.24)}
+  45%{box-shadow:0 0 0 2px rgba(98,214,41,.65),0 0 32px rgba(98,214,41,.34)}
+}
+@keyframes flashExpense{
+  0%,100%{box-shadow:0 16px 34px rgba(0,0,0,.24)}
+  45%{box-shadow:0 0 0 2px rgba(255,69,58,.65),0 0 32px rgba(255,69,58,.28)}
+}
+@media (prefers-reduced-motion: reduce){
+  .money-particle{display:none!important}
+  .money-toast{transition:none}
+  .flash-card-income,.flash-card-expense{animation:none}
+}
+
+
+.mascot-confirm{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-48%) scale(.86);
+  z-index:10020;
+  width:min(330px,84vw);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease,transform .28s cubic-bezier(.2,.9,.25,1.18);
+}
+.mascot-confirm.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.mascot-confirm img{
+  display:block;
+  width:100%;
+  max-height:58vh;
+  object-fit:contain;
+  border-radius:18px;
+  box-shadow:0 22px 65px rgba(0,0,0,.58);
+}
+.mascot-confirm.ingreso img{animation:mascotHappy .75s ease both}
+.mascot-confirm.gasto img{animation:mascotSad .65s ease both}
+@keyframes mascotHappy{
+  0%{transform:scale(.78) rotate(-3deg)}
+  45%{transform:scale(1.04) rotate(2deg)}
+  70%{transform:scale(.98) rotate(-1deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes mascotSad{
+  0%{transform:translateY(-8px) scale(.92)}
+  35%{transform:translateY(3px) scale(1.02)}
+  65%{transform:translateY(-2px) scale(.99)}
+  100%{transform:translateY(0) scale(1)}
+}
+.mascot-backdrop{
+  position:fixed;inset:0;z-index:10010;
+  background:rgba(0,0,0,.38);
+  opacity:0;pointer-events:none;
+  transition:opacity .18s ease;
+}
+.mascot-backdrop.show{opacity:1}
+@media(prefers-reduced-motion:reduce){
+  .mascot-confirm,.mascot-confirm img{transition:none!important;animation:none!important}
+}
+
 </style>
 </head>
 <body>
+<div id="mascotBackdrop" class="mascot-backdrop" aria-hidden="true"></div>
+<div id="mascotConfirm" class="mascot-confirm" role="status" aria-live="polite">
+  <img id="mascotImage" src="mascota-ingreso.jpg" alt="Confirmación de movimiento">
+</div>
+<div id="moneyStage" class="money-stage" aria-hidden="true"></div>
+<div id="moneyToast" class="money-toast" role="status" aria-live="polite">
+  <span id="moneyToastBig" class="big"></span>
+  <span id="moneyToastSmall" class="small"></span>
+</div>
 <div class="app">
   <section class="hero">
     <img src="icon-192.png" class="logo" alt="Querux">
@@ -178,6 +313,72 @@ function estaEnPeriodo(m,p){
 function filtrar(p){return movimientos.filter(m=>estaEnPeriodo(m,p))}
 function sumar(arr,tipo){return arr.filter(m=>m.tipo===tipo).reduce((a,m)=>a+Number(m.monto||0),0)}
 
+
+
+function animarMovimiento(tipo,monto){
+  const mascot=$('#mascotConfirm');
+  const mascotImg=$('#mascotImage');
+  const mascotBackdrop=$('#mascotBackdrop');
+  const esIngresoMascota=tipo==='ingreso';
+  mascot.classList.remove('show','ingreso','gasto');
+  mascotImg.src=esIngresoMascota?'mascota-ingreso.jpg':'mascota-gasto.jpg';
+  mascotImg.alt=esIngresoMascota?'Ingreso registrado en Querux':'Gasto registrado en Querux';
+  mascot.classList.add(esIngresoMascota?'ingreso':'gasto');
+  mascotBackdrop.classList.add('show');
+  void mascot.offsetWidth;
+  mascot.classList.add('show');
+  clearTimeout(window.__queruxMascotTimer);
+  window.__queruxMascotTimer=setTimeout(()=>{
+    mascot.classList.remove('show');
+    mascotBackdrop.classList.remove('show');
+  },1750);
+
+  const toast=$('#moneyToast');
+  const big=$('#moneyToastBig');
+  const small=$('#moneyToastSmall');
+  const stage=$('#moneyStage');
+  const esIngreso=tipo==='ingreso';
+
+  toast.classList.remove('show','ingreso','gasto');
+  toast.classList.add(esIngreso?'ingreso':'gasto');
+  big.textContent=esIngreso ? `+ ${fmt(monto)}` : `- ${fmt(monto)}`;
+  small.textContent=esIngreso ? 'Ingreso agregado correctamente' : 'Gasto agregado correctamente';
+
+  void toast.offsetWidth;
+  toast.classList.add('show');
+
+  const simbolos=esIngreso ? ['💵','💰','🪙','💸'] : ['💸','🧾','💵'];
+  const cantidad=esIngreso?14:11;
+
+  for(let i=0;i<cantidad;i++){
+    const el=document.createElement('span');
+    el.className='money-particle '+(esIngreso?'income':'expense');
+    el.textContent=simbolos[i%simbolos.length];
+    const lado=(Math.random()*220)-110;
+    const salida=(Math.random()*320)-160;
+    const r1=((Math.random()*50)-25)+'deg';
+    const r2=((Math.random()*160)-80)+'deg';
+    el.style.setProperty('--x1',lado+'px');
+    el.style.setProperty('--x2',salida+'px');
+    el.style.setProperty('--r1',r1);
+    el.style.setProperty('--r2',r2);
+    el.style.animationDelay=(i*0.025)+'s';
+    stage.appendChild(el);
+    setTimeout(()=>el.remove(),1250);
+  }
+
+  const formCard=$('#form')?.closest('.card');
+  if(formCard){
+    const cls=esIngreso?'flash-card-income':'flash-card-expense';
+    formCard.classList.remove('flash-card-income','flash-card-expense');
+    void formCard.offsetWidth;
+    formCard.classList.add(cls);
+    setTimeout(()=>formCard.classList.remove(cls),750);
+  }
+
+  clearTimeout(window.__queruxToastTimer);
+  window.__queruxToastTimer=setTimeout(()=>toast.classList.remove('show'),1450);
+}
 
 function cargarCategorias(){
   const arr=$('#tipo').value==='ingreso'?CATEGORIAS_INGRESO:CATEGORIAS_GASTO;
@@ -307,9 +508,10 @@ $('#form').addEventListener('submit',e=>{
   const monto=Number($('#monto').value);
   if(!Number.isFinite(monto)||monto<=0) return alert('Ingresa un monto válido.');
 
+  const tipoMovimiento=$('#tipo').value;
   movimientos.push({
     id:Date.now(),
-    tipo:$('#tipo').value,
+    tipo:tipoMovimiento,
     categoria:$('#categoria').value,
     fecha:$('#fecha').value||hoyISO(),
     monto,
@@ -320,6 +522,7 @@ $('#form').addEventListener('submit',e=>{
   $('#monto').value='';
   $('#detalle').value='';
   render();
+  animarMovimiento(tipoMovimiento,monto);
 });
 
 
