@@ -293,9 +293,113 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
   .saving-goal-stats{grid-template-columns:1fr}
 }
 
+
+.month-selector{
+  display:flex;
+  gap:10px;
+  align-items:end;
+  flex-wrap:wrap;
+}
+.month-selector > div{min-width:220px;flex:1}
+.month-history-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+.month-history-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.month-history-card small{
+  display:block;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+.month-history-card strong{font-size:18px}
+.month-history-card.income strong{color:#62d629}
+.month-history-card.expense strong{color:#ff5248}
+.month-history-card.balance strong.positive{color:#62d629}
+.month-history-card.balance strong.negative{color:#ff5248}
+.month-movements{
+  margin-top:14px;
+  display:grid;
+  gap:8px;
+}
+.month-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  background:rgba(255,255,255,.02);
+}
+.month-row .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.month-row .amt{font-weight:900}
+.month-row.income .amt{color:#62d629}
+.month-row.expense .amt{color:#ff5248}
+@media(max-width:720px){
+  .month-history-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+
+.delete-tx{
+  border:1px solid rgba(255,69,58,.45);
+  background:rgba(255,69,58,.10);
+  color:#ff6b63;
+  border-radius:10px;
+  min-width:42px;
+  min-height:42px;
+  padding:7px 10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.delete-tx:hover{background:rgba(255,69,58,.18)}
+.tx-actions{display:flex;align-items:center;gap:8px}
+.delete-modal{
+  position:fixed;inset:0;z-index:11000;
+  display:none;place-items:center;
+  background:rgba(0,0,0,.62);
+  padding:18px;
+}
+.delete-modal.show{display:grid}
+.delete-box{
+  width:min(390px,92vw);
+  background:#0e1921;
+  border:1px solid rgba(255,69,58,.42);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 24px 70px rgba(0,0,0,.62);
+}
+.delete-box h3{margin:0 0 8px;color:#fff}
+.delete-box p{color:var(--muted);margin:0 0 16px;line-height:1.45}
+.delete-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.delete-cancel{
+  background:#17232c;color:#fff;border:1px solid var(--border);
+  border-radius:12px;min-height:46px;font-weight:800;
+}
+.delete-confirm{
+  background:#b72e28;color:#fff;border:1px solid #ff5248;
+  border-radius:12px;min-height:46px;font-weight:900;
+}
+
 </style>
 </head>
 <body>
+<div id="deleteModal" class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+  <div class="delete-box">
+    <h3 id="deleteTitle">Eliminar transacción</h3>
+    <p id="deleteText">¿Seguro que quieres eliminar este movimiento? Esta acción no se puede deshacer.</p>
+    <div class="delete-actions">
+      <button id="cancelDelete" type="button" class="delete-cancel">Cancelar</button>
+      <button id="confirmDelete" type="button" class="delete-confirm">Eliminar</button>
+    </div>
+  </div>
+</div>
 <div id="mascotBackdrop" class="mascot-backdrop" aria-hidden="true"></div>
 <div id="mascotConfirm" class="mascot-confirm" role="status" aria-live="polite">
   <div class="mascot-panel">
@@ -335,6 +439,39 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
   </section>
 
 
+
+
+  <div class="section"><h2>Historial mensual</h2><span>Cada mes se conserva automáticamente</span></div>
+  <section class="card">
+    <div class="month-selector">
+      <div>
+        <label for="mesHistorial">Ver mes</label>
+        <input id="mesHistorial" type="month">
+      </div>
+      <button id="mesActualBtn" type="button" class="primary">Ir al mes actual</button>
+    </div>
+
+    <div class="month-history-grid">
+      <div class="month-history-card income">
+        <small>Ingresos</small>
+        <strong id="histIngresos">L 0.00</strong>
+      </div>
+      <div class="month-history-card expense">
+        <small>Gastos</small>
+        <strong id="histGastos">L 0.00</strong>
+      </div>
+      <div class="month-history-card balance">
+        <small>Saldo</small>
+        <strong id="histSaldo">L 0.00</strong>
+      </div>
+      <div class="month-history-card">
+        <small>Ahorro</small>
+        <strong id="histAhorro">L 0.00</strong>
+      </div>
+    </div>
+
+    <div id="historialMesLista" class="month-movements"></div>
+  </section>
 
   <div class="section"><h2>Registrar ahorro</h2><span>Agrega dinero a tu meta</span></div>
   <section class="card">
@@ -566,6 +703,94 @@ function animarMovimiento(tipo,monto){
 }
 
 
+
+
+let movimientoAEliminar=null;
+
+function pedirEliminarMovimiento(id){
+  const mov=movimientos.find(m=>String(m.id)===String(id));
+  if(!mov) return;
+  movimientoAEliminar=id;
+  const tipo=(mov.tipo||'gasto')==='ingreso'?'Ingreso':'Gasto';
+  $('#deleteText').textContent=`${tipo}: ${mov.categoria||'Sin categoría'} · ${fmt(Number(mov.monto)||0)}. ¿Seguro que quieres eliminarlo?`;
+  $('#deleteModal').classList.add('show');
+}
+function cerrarEliminar(){
+  movimientoAEliminar=null;
+  $('#deleteModal').classList.remove('show');
+}
+function eliminarMovimientoConfirmado(){
+  if(movimientoAEliminar===null) return;
+  movimientos=movimientos.filter(m=>String(m.id)!==String(movimientoAEliminar));
+  guardarMov();
+  cerrarEliminar();
+  render();
+}
+
+function mesActualClave(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function movimientoMes(m,clave){
+  return (m.fecha||'').slice(0,7)===clave;
+}
+function renderHistorialMensual(){
+  const input=$('#mesHistorial');
+  if(!input) return;
+  const clave=input.value||mesActualClave();
+  const arr=movimientos.filter(m=>movimientoMes(m,clave));
+
+  const ingresos=arr
+    .filter(m=>(m.tipo||'gasto')==='ingreso')
+    .reduce((s,m)=>s+(Number(m.monto)||0),0);
+
+  const gastos=arr
+    .filter(m=>(m.tipo||'gasto')==='gasto')
+    .reduce((s,m)=>s+(Number(m.monto)||0),0);
+
+  const ahorro=arr
+    .filter(m=>(m.tipo||'gasto')==='gasto' && (m.categoria||'').toLowerCase()==='ahorro')
+    .reduce((s,m)=>s+(Number(m.monto)||0),0);
+
+  const saldo=ingresos-gastos;
+
+  $('#histIngresos').textContent=fmt(ingresos);
+  $('#histGastos').textContent=fmt(gastos);
+  $('#histAhorro').textContent=fmt(ahorro);
+  $('#histSaldo').textContent=fmt(saldo);
+  $('#histSaldo').classList.toggle('positive',saldo>=0);
+  $('#histSaldo').classList.toggle('negative',saldo<0);
+
+  const box=$('#historialMesLista');
+  if(!arr.length){
+    box.innerHTML='<div class="note">No hay movimientos registrados en este mes.</div>';
+    return;
+  }
+
+  const orden=[...arr].sort((a,b)=>{
+    const fa=(a.fecha||'');
+    const fb=(b.fecha||'');
+    if(fa!==fb) return fb.localeCompare(fa);
+    return Number(b.id||0)-Number(a.id||0);
+  });
+
+  box.innerHTML=orden.slice(0,40).map(m=>{
+    const tipo=(m.tipo||'gasto')==='ingreso'?'income':'expense';
+    const signo=tipo==='income'?'+ ':'- ';
+    const detalle=(m.detalle||'').trim();
+    return `<div class="month-row ${tipo}">
+      <div>
+        <strong>${m.categoria||'Sin categoría'}</strong>
+        <div class="meta">${m.fecha||''}${detalle?' · '+detalle:''}</div>
+      </div>
+      <div class="tx-actions">
+        <div class="amt">${signo}${fmt(Number(m.monto)||0)}</div>
+        <button type="button" class="delete-tx" data-delete-id="${m.id}" aria-label="Eliminar transacción">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function totalAhorrado(){
   return movimientos
     .filter(m => (m.tipo||'gasto')==='gasto' && (m.categoria||'').toLowerCase()==='ahorro')
@@ -608,6 +833,7 @@ function cargarCategorias(){
 }
 
 function render(){
+  renderHistorialMensual();
   renderMetaAhorro();
   const mes=filtrar('mes');
   const hoy=filtrar('hoy');
@@ -751,6 +977,24 @@ $('#form').addEventListener('submit',e=>{
 
 
 
+
+
+document.addEventListener('click',(e)=>{
+  const btn=e.target.closest('[data-delete-id]');
+  if(btn) pedirEliminarMovimiento(btn.dataset.deleteId);
+});
+$('#cancelDelete').addEventListener('click',cerrarEliminar);
+$('#confirmDelete').addEventListener('click',eliminarMovimientoConfirmado);
+$('#deleteModal').addEventListener('click',(e)=>{
+  if(e.target===$('#deleteModal')) cerrarEliminar();
+});
+
+$('#mesHistorial').addEventListener('change',()=>renderHistorialMensual());
+$('#mesActualBtn').addEventListener('click',()=>{
+  $('#mesHistorial').value=mesActualClave();
+  renderHistorialMensual();
+});
+
 $('#formAhorro').addEventListener('submit',(e)=>{
   e.preventDefault();
   const monto=parseFloat($('#ahorroMonto').value);
@@ -814,6 +1058,7 @@ $('#fecha').value=hoyISO();
 $('#mesLabel').textContent=new Intl.DateTimeFormat('es-HN',{month:'long',year:'numeric'}).format(new Date());
 
 cargar();
+if($('#mesHistorial')) $('#mesHistorial').value=mesActualClave();
 cargarCategorias();
 render();
 
