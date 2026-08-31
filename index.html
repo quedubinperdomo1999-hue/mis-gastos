@@ -238,6 +238,61 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
   box-shadow:0 0 17px rgba(255,69,58,.32);
 }
 
+
+.saving-goal-grid{
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:16px;
+}
+.saving-goal-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+.saving-stat{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.saving-stat small{
+  display:block;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+.saving-stat strong{font-size:19px}
+.saving-progress{
+  height:14px;
+  background:#17232c;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:14px;
+  border:1px solid var(--border);
+}
+.saving-progress > div{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#3b82f6,#62d629);
+  border-radius:999px;
+  transition:width .35s ease;
+}
+.saving-message{
+  margin-top:10px;
+  font-size:13px;
+  color:var(--muted);
+}
+.saving-percent{
+  font-size:32px;
+  font-weight:950;
+  color:#62d629;
+  line-height:1;
+}
+@media(max-width:720px){
+  .saving-goal-grid{grid-template-columns:1fr}
+  .saving-goal-stats{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -279,6 +334,46 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
     </form>
   </section>
 
+
+  <div class="section"><h2>Meta de ahorro</h2><span>Tu progreso personal</span></div>
+  <section class="card">
+    <div class="saving-goal-grid">
+      <div>
+        <label for="metaAhorro">Meta total</label>
+        <div class="row">
+          <input id="metaAhorro" type="number" min="0" step="0.01" placeholder="Ej. 50000">
+          <button id="guardarMetaAhorro" type="button" class="primary">Guardar meta</button>
+        </div>
+
+        <div class="saving-progress"><div id="barraAhorro"></div></div>
+
+        <div class="saving-goal-stats">
+          <div class="saving-stat">
+            <small>Meta</small>
+            <strong id="metaAhorroTexto">L 0.00</strong>
+          </div>
+          <div class="saving-stat">
+            <small>Ahorrado</small>
+            <strong id="ahorradoTexto">L 0.00</strong>
+          </div>
+          <div class="saving-stat">
+            <small>Falta</small>
+            <strong id="faltaAhorroTexto">L 0.00</strong>
+          </div>
+        </div>
+
+        <div id="mensajeAhorro" class="saving-message">Define una meta para comenzar.</div>
+      </div>
+
+      <div class="card" style="display:grid;place-items:center;text-align:center;min-height:150px">
+        <div>
+          <div id="porcentajeAhorro" class="saving-percent">0%</div>
+          <div class="note">de tu meta completada</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div class="section"><h2>Presupuesto mensual</h2><span id="mesLabel"></span></div>
   <section class="card">
     <div class="form">
@@ -318,6 +413,7 @@ button{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15p
 (()=>{
 const KEY='mis_gastos_hn_v1';
 const BKEY='mis_gastos_presupuestos_v1';
+const SKEY='querux_meta_ahorro_v1';
 
 const CATEGORIAS_GASTO=[
   'Casa','Alimentación','Carro','Entretenimiento',
@@ -325,7 +421,7 @@ const CATEGORIAS_GASTO=[
 ];
 const CATEGORIAS_INGRESO=['Negocio','Interés sobre préstamo','Salario'];
 
-let movimientos=[],presupuestos={},periodo='mes';
+let movimientos=[],presupuestos={},periodo='mes',metaAhorro=0;
 const $=s=>document.querySelector(s);
 const fmt=n=>'L '+Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -352,6 +448,7 @@ function cargar(){
     presupuestos=JSON.parse(localStorage.getItem(BKEY)||'{}');
     if(!presupuestos || typeof presupuestos!=='object' || Array.isArray(presupuestos)) presupuestos={};
   }catch(e){presupuestos={}}
+  metaAhorro=parseFloat(localStorage.getItem(SKEY)||'0')||0;
 }
 function guardarMov(){localStorage.setItem(KEY,JSON.stringify(movimientos))}
 function guardarPres(){localStorage.setItem(BKEY,JSON.stringify(presupuestos))}
@@ -447,12 +544,50 @@ function animarMovimiento(tipo,monto){
   window.__queruxToastTimer=setTimeout(()=>toast.classList.remove('show'),1450);
 }
 
+
+function totalAhorrado(){
+  return movimientos
+    .filter(m => (m.tipo||'gasto')==='gasto' && (m.categoria||'').toLowerCase()==='ahorro')
+    .reduce((s,m)=>s+(Number(m.monto)||0),0);
+}
+function guardarMetaAhorro(){
+  localStorage.setItem(SKEY,String(metaAhorro||0));
+}
+function renderMetaAhorro(){
+  const ahorrado=totalAhorrado();
+  const meta=Math.max(0,Number(metaAhorro)||0);
+  const falta=Math.max(0,meta-ahorrado);
+  const pct=meta>0 ? Math.min(100,(ahorrado/meta)*100) : 0;
+
+  $('#metaAhorro').value=meta||'';
+  $('#metaAhorroTexto').textContent=fmt(meta);
+  $('#ahorradoTexto').textContent=fmt(ahorrado);
+  $('#faltaAhorroTexto').textContent=fmt(falta);
+  $('#porcentajeAhorro').textContent=Math.round(pct)+'%';
+  $('#barraAhorro').style.width=pct+'%';
+
+  if(meta<=0){
+    $('#mensajeAhorro').textContent='Define una meta para comenzar.';
+  }else if(ahorrado>=meta){
+    $('#mensajeAhorro').textContent='🎉 ¡Meta alcanzada! Has completado tu objetivo de ahorro.';
+  }else if(pct>=75){
+    $('#mensajeAhorro').textContent='🔥 Vas excelente. Ya superaste el 75% de tu meta.';
+  }else if(pct>=50){
+    $('#mensajeAhorro').textContent='💪 Ya llevas más de la mitad de tu meta.';
+  }else if(ahorrado>0){
+    $('#mensajeAhorro').textContent=`Llevas ${fmt(ahorrado)} y te faltan ${fmt(falta)}.`;
+  }else{
+    $('#mensajeAhorro').textContent='Registra movimientos en la categoría Ahorro para avanzar.';
+  }
+}
+
 function cargarCategorias(){
   const arr=$('#tipo').value==='ingreso'?CATEGORIAS_INGRESO:CATEGORIAS_GASTO;
   $('#categoria').innerHTML=arr.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
 function render(){
+  renderMetaAhorro();
   const mes=filtrar('mes');
   const hoy=filtrar('hoy');
   const ingresos=sumar(mes,'ingreso');
@@ -592,6 +727,14 @@ $('#form').addEventListener('submit',e=>{
   animarMovimiento(tipoMovimiento,monto);
 });
 
+
+
+$('#guardarMetaAhorro').addEventListener('click',()=>{
+  const v=parseFloat($('#metaAhorro').value);
+  metaAhorro=Number.isFinite(v) && v>=0 ? v : 0;
+  guardarMetaAhorro();
+  renderMetaAhorro();
+});
 
 $('#guardarPresupuesto').addEventListener('click',()=>{
   const v=Number($('#presupuesto').value);
