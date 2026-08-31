@@ -1,11 +1,11 @@
 {
-  "name": "Querux",
+  "name": "Querux - Mis Gastos",
   "short_name": "Querux",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#071017",
   "theme_color": "#071017",
-  "description": "Control de ingresos, gastos, categorías, gráficos y presupuesto mensual.",
+  "description": "Control de gastos, ingresos, presupuesto y gráficos.",
   "icons": [
     {
       "src": "icon-192.png",
