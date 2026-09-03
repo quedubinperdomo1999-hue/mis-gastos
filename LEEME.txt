@@ -1,0 +1,25 @@
+QUERUX 2.0 - ARCHIVOS PARA GITHUB PAGES
+
+1. Entra al repositorio: mis-gastos
+2. En la carpeta principal, reemplaza index.html por el index.html de esta carpeta.
+3. Reemplaza service-worker.js por el service-worker.js de esta carpeta.
+4. NO borres: manifest.json, icon-192.png, icon-512.png, mascota-ingreso.jpg ni mascota-gasto.jpg.
+5. Haz Commit changes.
+6. Abre la app y, si todavía ves la versión anterior, actualiza la página una vez o cierra y vuelve a abrir la app instalada.
+
+IMPORTANTE:
+La versión 2.0 conserva las claves de localStorage de la app anterior, por lo que los movimientos, presupuestos y meta de ahorro existentes deben mantenerse en el mismo navegador/dispositivo.
+
+NUEVAS FUNCIONES:
+- Estado automático del mes.
+- Ahorro del mes y porcentaje de ahorro.
+- Meta/reto de ahorro con fecha objetivo y cálculo diario/semanal.
+- Presupuesto por categoría con alertas al 80% y 100%.
+- Gastos recurrentes mensuales.
+- Gráfico de ingresos vs. gastos de los últimos 6 meses.
+- Buscar y filtrar movimientos.
+- Editar movimientos.
+- Modo claro/oscuro.
+- Exportar movimientos a CSV compatible con Excel.
+- Imprimir/guardar como PDF.
+- Copia de seguridad JSON y restauración.
