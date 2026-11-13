@@ -57,3 +57,9 @@ Las mascotas y los iconos del repositorio original no se incluyen en este ZIP:
 se conservan en el repositorio durante la actualización.
 
 VERSIÓN PREPARADA EL 13/11/2026.
+
+CORRECCIÓN DEL LOGO (13/11/2026)
+- Querux 3.0 ahora utiliza icon-192.png como logo en el menú lateral y la cabecera móvil.
+- NO elimines icon-192.png del repositorio: es el mismo archivo que ya usaba Querux 2.0.
+- Si no aparece, confirma que icon-192.png está en la raíz, junto a index.html, y que el nombre coincide exactamente.
+- Sube los archivos del ZIP dentro de querux-3/ directamente a la raíz del repositorio (no subas la carpeta querux-3).

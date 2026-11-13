@@ -1,5 +1,5 @@
 // Querux 3.0: caché versionado para que no aparezca la interfaz antigua.
-const CACHE = 'querux-v3-20261113';
+const CACHE = 'querux-v3-logo-20261113';
 const CORE = ['./','./index.html','./querux3.css','./querux3.js'];
 self.addEventListener('install', e => {self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).catch(()=>{}))});
 self.addEventListener('activate', e => {e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k.startsWith('querux-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
