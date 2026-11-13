@@ -1,0 +1,78 @@
+QUERUX 3.1 · LOGOS OFICIALES Y AVISOS DE PAGO
+=======================================================
+
+ESTA ACTUALIZACIÓN INCLUYE
+
+- Los dos logos originales que proporcionaste: icon-192.png e icon-512.png.
+- La bienvenida personalizada y todas las secciones de Querux 3.0.
+- Pagos programados con nombre, monto, fecha de vencimiento y hora.
+- Repeticiones: única, semanal, cada 15 días y mensual.
+- Aviso: el mismo día, o 1, 2, 3 o 7 días antes.
+- Campana de notificaciones en la barra superior.
+- Posibilidad de marcar un aviso como pagado, deshacerlo, editarlo o eliminarlo.
+- Botones para preparar avisos a partir de gastos recurrentes y deudas.
+- Los pagos programados aparecen en el calendario y panel de próximos pagos.
+- Los nuevos avisos se incluyen en las copias JSON de seguridad.
+
+IMPORTANTE: LIMITACIONES DE LAS ALERTAS LOCALES
+
+Estos avisos se verifican mientras la aplicación está abierta o cuando vuelves
+ a abrirla. Con permisos del navegador, la app puede mostrar una notificación
+ del dispositivo al alcanzar la hora del aviso. NO se garantiza que una alerta
+ se dispare a tiempo con la app y el navegador completamente cerrados.
+
+Todavía NO son notificaciones push reales ni se sincronizan entre dispositivos.
+Para enviar avisos aun con la app cerrada necesitaremos añadir posteriormente
+un servicio de notificaciones push (servidor o servicio gestionado).
+
+Los avisos, igual que tus movimientos, se guardan en el navegador que usas.
+La opción «Marcar como pagado» solo cambia el estado del aviso; NO crea
+un gasto ni reduce la deuda automáticamente, evitando registros duplicados.
+Registra el movimiento real por separado cuando pagues.
+
+CÓMO ACTUALIZAR EN GITHUB (PASO A PASO)
+
+1. Abre tu Querux actual. Ve a Ajustes y respaldo y descarga una copia JSON.
+   Guarda esa copia únicamente en tu dispositivo, NO en GitHub.
+2. En https://github.com/quedubinperdomo1999-hue/mis-gastos pulsa
+   «Code» y «Download ZIP» para respaldar también el código anterior.
+3. Extrae este ZIP a una carpeta de tu computadora.
+4. Abre el repositorio y usa «Add file > Upload files».
+5. Sube TODOS los archivos de esta carpeta al NIVEL PRINCIPAL de mis-gastos:
+     index.html
+     querux3.js
+     querux3.css
+     manifest.json
+     service-worker.js
+     icon-192.png
+     icon-512.png
+   Puedes subir también este archivo LEEME si lo deseas.
+   NO subas la carpeta completa como subcarpeta; index.html debe quedar
+   directamente en la raíz del repositorio.
+6. Guarda con «Commit changes».
+7. Abre https://quedubinperdomo1999-hue.github.io/mis-gastos/
+   Si todavía aparece la versión antigua, actualiza con Ctrl + F5.
+   Comprueba tus movimientos anteriores antes de seguir usando la app.
+
+CÓMO PROGRAMAR UN AVISO
+
+1. Entra a «Pagos y deudas».
+2. En «Programar avisos de pago», llena nombre, monto, fecha, hora,
+   frecuencia y anticipación.
+3. Presiona «Agendar aviso».
+4. Pulsa «Activar alertas del dispositivo» y concede permiso si lo deseas.
+5. Usa «Probar alerta» para verificar las notificaciones compatibles.
+6. Consulta la campana superior para ver avisos de los próximos 7 días.
+7. Cuando pagues, presiona «Pagado». Puedes deshacer esa marca.
+
+RESPALDO Y COMPATIBILIDAD
+
+- Esta actualización reutiliza las mismas claves de almacenamiento de
+  Querux 2.0 y Querux 3.0 para movimientos, presupuestos, ahorros, cuentas,
+  gastos recurrentes y deudas.
+- Los recordatorios nuevos se almacenan por separado.
+- Los respaldos JSON de Querux 2.0 y 3.0 continúan siendo compatibles con
+  la función de restauración incluida.
+- Antes de restaurar, la app pide confirmación y descarga una copia previa.
+
+No compartas tu respaldo JSON con terceros ni lo subas al repositorio público.

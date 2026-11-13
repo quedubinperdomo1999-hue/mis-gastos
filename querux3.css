@@ -9,3 +9,66 @@
 /* Logo original restaurado en barra lateral y encabezado móvil */
 .brand-logo,.mobile-logo{padding:0;overflow:hidden;letter-spacing:normal;}
 .brand-logo img,.mobile-logo img{display:block;width:100%;height:100%;object-fit:cover;}
+
+/* Logo principal de Querux: misma presentación visible del encabezado de Querux 2.0. */
+.welcome-brand{display:flex;align-items:center;gap:16px;min-width:0;flex:1;}
+.welcome-brand-copy{min-width:0;}
+.welcome-logo{display:block;flex:0 0 78px;width:78px;height:78px;border-radius:22px;object-fit:cover;box-shadow:0 0 0 2px rgba(98,214,41,.35),0 8px 24px rgba(0,0,0,.28);}
+.welcome-brand .eyebrow{margin:0 0 9px;}
+.welcome-brand h2{color:#79e850;font-weight:850;font-size:30px;letter-spacing:-.6px;margin:0 0 5px;}
+.welcome-brand p{font-size:13px;line-height:1.45;}
+@media(max-width:720px){
+  .welcome-brand{gap:13px;align-self:stretch;}
+  .welcome-logo{flex-basis:72px;width:72px;height:72px;border-radius:21px;}
+  .welcome-brand h2{font-size:25px;}
+  .welcome>.btn{align-self:flex-start;}
+}
+@media(max-width:390px){
+  .welcome-logo{flex-basis:62px;width:62px;height:62px;border-radius:18px;}
+  .welcome-brand{gap:11px;}
+  .welcome-brand h2{font-size:23px;}
+  .welcome-brand .eyebrow{font-size:8px;letter-spacing:.7px;}
+  .welcome-brand p{font-size:11px;}
+}
+
+/* Bienvenida con nombre: visible en el título del panel y editable desde Ajustes */
+.top-title h1{overflow-wrap:anywhere;line-height:1.3}
+.profile-form>label,.welcome-dialog form>label{font-size:12px;font-weight:750;color:var(--text);display:block;margin-bottom:8px}
+.profile-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.profile-controls input,.welcome-dialog form>input{min-height:43px;min-width:0;flex:1;border-radius:10px;padding:10px 12px;background:var(--input);color:var(--text);border:1px solid var(--line);font:inherit}
+.profile-form .note{margin:9px 0 0}
+.welcome-dialog{z-index:230}
+.welcome-dialog-card{max-width:470px;padding:25px}
+.welcome-dialog-head{display:flex;align-items:center;gap:14px;margin-bottom:13px}
+.welcome-dialog-head img{border-radius:15px;object-fit:cover}
+.welcome-dialog-head h3{margin:3px 0 0;font-size:22px;color:var(--text)}
+.welcome-dialog p{line-height:1.5;font-size:13px;margin-bottom:16px}
+.welcome-dialog form>input{width:100%;display:block;margin:0 0 16px}
+.welcome-dialog .form-actions{gap:9px}
+@media(max-width:490px){.profile-controls{display:grid}.profile-controls input,.profile-controls .btn{width:100%}.welcome-dialog .form-actions{display:grid}.welcome-dialog .form-actions .btn{width:100%}}
+
+
+/* Querux 3.1: campana y pagos programados */
+.notice-control{position:relative;display:flex;align-items:center;flex-shrink:0}
+.notice-control .round-btn{position:relative;font-size:21px}
+.alert-badge{position:absolute;right:-5px;top:-7px;background:#ff8175;color:#14201e;border-radius:100px;min-width:19px;height:19px;display:grid;place-items:center;font-size:10px;font-weight:850;padding:0 4px;box-shadow:0 0 0 2px var(--card)}
+.alert-badge[hidden]{display:none!important}
+.alert-tray{position:absolute;z-index:92;top:48px;right:0;width:min(350px,calc(100vw - 20px));padding:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 52px #0007}
+.alert-tray .section-head{align-items:center;margin:0 0 11px}
+.alert-tray .section-head h3{margin:0}
+.alert-tray .simple-row{gap:8px}
+.alert-tray .tx-amt{font-size:12px}
+.alert-tray .btn{margin-top:12px}
+.reminders-section{margin-bottom:18px;border-color:color-mix(in srgb,var(--green) 30%,var(--line))}
+.reminder-note{margin:0 0 19px;background:var(--card3);border:1px solid var(--line)}
+.reminder-note p{font-size:12px}
+.reminder-note .note{margin-top:10px}
+.reminder-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.reminder-form{margin-top:12px}
+.reminder-item{gap:10px;flex-wrap:wrap}
+.reminder-item .tx-body{min-width:190px;flex:1 1 180px}
+.reminder-item .tx-actions{flex-shrink:0}
+.reminder-overdue{border-left:3px solid var(--red);padding-left:10px}
+@media(max-width:720px){.alert-tray{right:-88px;max-width:calc(100vw - 22px)}.top-actions{gap:5px}.notice-control .round-btn{width:36px;height:36px}}
+@media(max-width:450px){.reminder-item .tx-actions{width:100%;justify-content:flex-end}.reminder-buttons .btn{width:100%}}
+@media print{.notice-control,.reminders-section form,.reminder-buttons{display:none!important}}
