@@ -1,0 +1,59 @@
+QUERUX 3.0 — INSTRUCCIONES DE PUBLICACIÓN
+========================================
+
+ESTA ES UNA VERSIÓN NUEVA DE PRUEBA. NO SE HA PUBLICADO EN TU GITHUB.
+
+1. Abre tu Querux 2.0 en el navegador donde tienes los datos.
+2. Baja hasta Movimientos → Copia de seguridad.
+3. Guarda el archivo .json en tu computadora. ¡NO LO SUBAS A GITHUB!
+4. Antes de reemplazar archivos, conserva una copia del index.html original.
+5. Prueba Querux 3.0 en una carpeta/repo de prueba. Para probar el HTML localmente,
+   usa un servidor local (por ejemplo: python -m http.server 8080) y abre
+   http://localhost:8080/ desde la carpeta querux-3.
+   Abre Ajustes → Restaurar copia para probar tu respaldo sin usar la web real.
+6. Cuando compruebes que se muestran tus movimientos, presupuestos y ahorros,
+   entra al repositorio https://github.com/quedubinperdomo1999-hue/mis-gastos
+   y reemplaza/sube estos CINCO archivos en la RAÍZ del repositorio:
+        index.html
+        querux3.css
+        querux3.js
+        manifest.json
+        service-worker.js
+7. Conserva los archivos existentes de las mascotas:
+        mascota-ingreso.jpg
+        mascota-gasto.jpg
+   y de los iconos:
+        icon-192.png
+        icon-512.png
+8. Visita https://quedubinperdomo1999-hue.github.io/mis-gastos/
+   con el mismo navegador y dispositivo para leer sus datos guardados.
+   Si no aparecen, NO registres más movimientos todavía: utiliza
+   Ajustes → Restaurar copia y selecciona el archivo JSON descargado.
+9. Si sigues viendo la versión anterior, recarga con Ctrl + F5; la caché
+   del service worker se renueva con la versión 3.
+
+DATOS Y COMPATIBILIDAD
+---------------------
+Las claves originales de localStorage usadas en Querux 2.0 se mantienen:
+ mis_gastos_hn_v1, mis_gastos_presupuestos_v1,
+ querux_meta_ahorro_v1, querux_meta_fecha_v1,
+ querux_presupuestos_categoria_v1, querux_recurrentes_v1 y querux_tema_v1.
+La copia JSON de Querux 2.0 se puede restaurar en la sección Ajustes.
+Querux 3.0 añade claves aparte para cuentas, transferencias, deudas y categorías.
+Los movimientos previos quedan asignados provisionalmente a «Principal».
+Se recomienda revisar los saldos de apertura para reconciliarlos con el banco.
+Las transferencias entre cuentas no se contabilizan como ingresos ni gastos.
+El ahorro antiguo (categoría Ahorro, tipo gasto) sigue siendo compatible;
+Querux 3.0 lo presenta aparte de los gastos reales.
+
+IMPORTANTE
+---------
+Los datos siguen en localStorage: NO se sincronizan entre dispositivos.
+En navegación privada o al borrar datos del navegador se pueden perder.
+Descarga respaldos periódicos. No compartas archivos JSON con datos financieros.
+Los pagos de deuda se clasifican como salida de efectivo / categoría Préstamo;
+no se calculan intereses. Los reportes PDF se producen con Imprimir → Guardar PDF.
+Las mascotas y los iconos del repositorio original no se incluyen en este ZIP:
+se conservan en el repositorio durante la actualización.
+
+VERSIÓN PREPARADA EL 13/11/2026.
